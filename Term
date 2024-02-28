@@ -1,0 +1,117 @@
+import edu.princeton.cs.algs4.StdOut;
+
+import java.util.Arrays;
+import java.util.Comparator;
+
+/*
+This code extracts the query (word) and the weight of a Term in order to
+implement the use of different comparators. The comparators created include
+byReverseWeightOrder, and byPrefixOrder.
+ */
+public class Term implements Comparable<Term> {
+
+    private String query; // instance variable for the word of the Term
+    private long weight; // instance variable for the weight of the Term
+
+
+    // Initializes a term with the given query string and weight.
+    public Term(String query, long weight) {
+        if (query == null || weight < 0) {
+            throw new IllegalArgumentException("Query is null or weight is negative");
+        }
+        this.query = query;
+        this.weight = weight;
+    }
+
+
+    private static class ByReverseWeightOrder implements Comparator<Term> {
+        public int compare(Term t1, Term t2) {
+            // positive number: t1 less
+            // zero: equal
+            // negative number: t1 greater
+            return (int) (t2.weight - t1.weight);
+        }
+    }
+
+    // Compares the two terms in descending order by weight.
+    public static Comparator<Term> byReverseWeightOrder() {
+        ByReverseWeightOrder reverse = new ByReverseWeightOrder();
+        return reverse;
+    }
+
+    private static class ByPrefixOrder implements Comparator<Term> {
+        private int r; // instance variable to take in how many letters to compare
+
+        // Constructor to initialize r and checks if r is negative
+        public ByPrefixOrder(int r) {
+            if (r < 0) {
+                throw new IllegalArgumentException("r can't be negative");
+            }
+            this.r = r;
+        }
+
+        // method that compares each letter in a query with corner cases if the
+        // term query is less than r
+        public int compare(Term t1, Term t2) {
+            for (int i = 0; i < r; i++) {
+                // corner cases if queries are less than r
+                if (t1.query.length() == i && t2.query.length() == i) {
+                    // same word
+                    return 0;
+                }
+                else if (t1.query.length() == i) {
+                    return -1;
+                }
+                else if (t2.query.length() == i) {
+                    return 1;
+                }
+
+                // comparison of each character occurs
+                if (t1.query.charAt(i) != t2.query.charAt(i)) {
+                    // positive number: t1 greater
+                    // zero: equal
+                    // negative number: t1 less
+                    return (t1.query.charAt(i) - t2.query.charAt(i));
+                }
+            }
+            // same word
+            return 0;
+        }
+    }
+
+    // Compares the two terms in lexicographic order,
+    // but using only the first r characters of each query.
+    public static Comparator<Term> byPrefixOrder(int r) {
+        ByPrefixOrder prefix = new ByPrefixOrder(r);
+        return prefix;
+    }
+
+    // Compares the two terms in lexicographic order by query.
+    public int compareTo(Term that) {
+        return (this.query.compareTo(that.query));
+    }
+
+    // Returns a string representation of this term in the following format:
+    // the weight, followed by a tab, followed by the query.
+    public String toString() {
+        return String.format("%d\t%s", weight, query);
+    }
+
+    // unit testing (required)
+    public static void main(String[] args) {
+        Term[] terms = new Term[3]; // new array to store matches
+        terms[0] = new Term("abc", 1);
+        terms[1] = new Term("abcd", 1);
+        terms[2] = new Term("abcde", 1);
+
+        Arrays.sort(terms, Term.byReverseWeightOrder());
+        for (int i = 0; i < 3; i++) {
+            StdOut.println(terms[i]);
+        }
+
+        Arrays.sort(terms, Term.byPrefixOrder(2));
+        for (int i = 0; i < 3; i++) {
+            StdOut.println(terms[i]);
+        }
+    }
+}
