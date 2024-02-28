@@ -1,0 +1,91 @@
+import edu.princeton.cs.algs4.StdOut;
+
+import java.util.Arrays;
+import java.util.Comparator;
+
+public class Autocomplete {
+    private Term[] terms;
+
+    // Initializes the data structure from the given array of terms.
+    public Autocomplete(Term[] terms) {
+        if (terms == null) {
+            throw new IllegalArgumentException("Terms is null");
+        }
+        this.terms = new Term[terms.length];
+
+        for (int i = 0; i < terms.length; i++) {
+            if (terms[i] == null) {
+                throw new IllegalArgumentException("Terms is null");
+            }
+            this.terms[i] = terms[i];
+        }
+        Arrays.sort(this.terms);
+    }
+
+    // Returns all terms that start with the given prefix,
+    // in descending order of weight.
+    public Term[] allMatches(String prefix) {
+        if (prefix == null) {
+            throw new IllegalArgumentException("Prefix can't be null");
+        }
+        // Comparator
+        Comparator<Term> comparison = Term.byPrefixOrder(prefix.length());
+
+        // Make prefix into a Term object
+        Term prefix1 = new Term(prefix, 0);
+
+        int first = BinarySearchDeluxe.firstIndexOf(terms, prefix1, comparison);
+        int last = BinarySearchDeluxe.lastIndexOf(terms, prefix1, comparison);
+
+        // Didn't find
+        if (first == -1) {
+            return new Term[0];
+        }
+
+        // numberOfMatches
+        int newLength = last - first + 1;
+
+        Term[] newTerms = new Term[newLength]; // new array to store matches
+        for (int i = 0; i < newLength; i++) {
+            newTerms[i] = terms[first + i];
+        }
+        // Sort by descending order of weight;
+        Arrays.sort(newTerms, Term.byReverseWeightOrder());
+        return newTerms;
+    }
+
+    // Returns the number of terms that start with the given prefix.
+    public int numberOfMatches(String prefix) {
+        if (prefix == null) {
+            throw new IllegalArgumentException("Prefix can't be null");
+        }
+        // Comparator
+        Comparator<Term> comparison = Term.byPrefixOrder(prefix.length());
+
+        // Make prefix into a Term object
+        Term prefix1 = new Term(prefix, 0);
+
+        int first = BinarySearchDeluxe.firstIndexOf(terms, prefix1, comparison);
+        int last = BinarySearchDeluxe.lastIndexOf(terms, prefix1, comparison);
+
+        // If not found
+        if (first == -1) {
+            return 0;
+        }
+
+        return last - first + 1;
+    }
+
+    // unit testing (required)
+    public static void main(String[] args) {
+        Term[] terms = new Term[3]; // new array to store matches
+        terms[0] = new Term("abc", 1);
+        terms[1] = new Term("abcd", 1);
+        terms[2] = new Term("abcde", 1);
+
+        Autocomplete p1 = new Autocomplete(terms);
+        p1.allMatches("ab");
+        StdOut.println(p1.numberOfMatches("ab"));
+    }
+
+}
